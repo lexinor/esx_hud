@@ -45,25 +45,6 @@ jobs:
         env:
           CI: false
 
-      - name: Bump manifest version
-        run: node .github/actions/bump-manifest-version.js
-        env:
-          TGT_RELEASE_VERSION: ${{ github.ref_name }}
-
-      - name: Push manifest change
-        uses: EndBug/add-and-commit@v8
-        with:
-          add: fxmanifest.lua
-          push: true
-          author_name: Manifest Bumper
-          author_email: 41898282+github-actions[bot]@users.noreply.github.com
-          message: 'chore: bump manifest version to ${{ github.ref_name }}'
-
-      - name: Update tag ref
-        uses: EndBug/latest-tag@latest
-        with:
-          tag-name: ${{ github.ref_name }}
-
       - name: Bundle files
         run: |
           mkdir -p ./temp/esx_hud
@@ -72,11 +53,12 @@ jobs:
           cp -r ./{client,locales,server,stream,shared} ./temp/esx_hud
           cp -r ./web/dist ./temp/esx_hud/web/dist
           cd ./temp && zip -r ../esx_hud.zip ./esx_hud
-      - name: Create Release
+      - name: Test Release
         uses: 'marvinpinto/action-automatic-releases@v1.2.1'
         id: auto_release
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          automatic_release_tag: "latest"
           title: '${{ env.RELEASE_VERSION }}'
           prerelease: true
           files: esx_hud.zip
